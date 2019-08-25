@@ -5,10 +5,9 @@
 <mapper namespace="cn.yongtao.mapper.UserMapper">
 
     <select id="queryUser" parameterType="int" resultType="user">
-        select id,username
+        select id, username, status, last_time, create_time
         from user
-        where username = #{username}
-          and password = #{password}
+        where id = #{id}
     </select>
 
     <select id="queryPassword" parameterType="string" resultType="string">
@@ -17,8 +16,19 @@
         where username = #{username}
     </select>
 
+    <select id="queryIdByUsername" parameterType="string" resultType="int">
+        select ifnull((select id from user where username = #{username} limit 1), 0)
+    </select>
+
     <insert id="insertUser" parameterType="user">
-        insert into user(username, password, status) value (#{username}, #{password}, 0)
+        insert into user(username, password, status, create_time) value (#{username}, #{password}, 0, current_timestamp)
     </insert>
+
+    <update id="updateLastTime" parameterType="int">
+        update user
+        set last_time = current_timestamp
+        where id = #{id}
+        limit 1
+    </update>
 
 </mapper>

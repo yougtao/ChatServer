@@ -20,9 +20,16 @@ public class UserService
 
         String passwordHash = userMapper.queryPassword(username);
 
-        if (BCrypt.checkpw(password, passwordHash))
+        if (BCrypt.checkpw(password, passwordHash)) {
             System.out.println("It matches");
-        else
+
+            // 查询用户信息
+            int id = userMapper.queryIdByUsername(username);
+            User user = userMapper.queryUser(id);
+
+            // 修改登录时间
+            userMapper.updateLastTime(id);
+        } else
             System.out.println("It does not match");
     }
 
@@ -34,6 +41,11 @@ public class UserService
         // 将hashed写入数据库password
         User user = new User(username, hashed);
         userMapper.insertUser(user);
+    }
+
+    // 用户名是否重复
+    public int queryIdByUsername(String username) {
+        return userMapper.queryIdByUsername(username);
     }
 
 }// end

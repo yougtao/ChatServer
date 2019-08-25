@@ -39,12 +39,25 @@ public class LoginController
         userService.loginUser(strings[0], strings[1]);
     }
 
-//    注册
+    // 注册
     @MessageType(Constant.USER_LOGUP)
-    public void logup(ResultMessage msg){
+    public void logup(ResultMessage msg) {
         String body = msg.getBody();
         String[] strings = body.split(",");
 
-        userService.logupUser(strings[0], strings[1]);
+        String username = strings[0];
+
+        // 用户名是否存在
+        if (userService.queryIdByUsername(username) == 0)
+            userService.logupUser(username, strings[1]);
     }
+
+
+    // 用户名是否存在
+    @MessageType(262)
+    public void existUsername(ResultMessage msg) {
+        int id = userService.queryIdByUsername(msg.getBody());
+        System.out.println("结果：" + id);
+    }
+
 }// end
