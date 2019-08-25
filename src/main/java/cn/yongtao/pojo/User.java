@@ -11,6 +11,9 @@ public class User
     private Timestamp lastTime;
     private Timestamp createTime;
 
+    public User(){
+    }
+
     public User(String username, String password) {
         this.username = username;
         this.password = password;

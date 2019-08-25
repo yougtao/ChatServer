@@ -34,27 +34,34 @@ public class LoginController
 
     // 登录
     @MessageType(Constant.USER_LOGIN)
-    public Message login(ResultMessage msg) {
-        String body = msg.getBody();
+    public Message login(Message msg) {
+        String body = (String) msg.getBody();
         String[] strings = body.split(",");
 
         User user = userService.loginUser(strings[0], strings[1]);
         Map<String, Object> map = new HashMap<>();
-        if (user != null) {
-            map.put("code", 200);
-            map.put("msg","success");
-            map.put("user", user);
-        } else {
+
+        if (user == null) {
             map.put("code", 401);
-            map.put("msg", "password");
+            map.put("msg", "username");
+        } else {
+            if (user.getUsername() == null) {
+                map.put("code", 401);
+                map.put("msg", "password");
+            } else {
+                map.put("code", 200);
+                map.put("msg", "success");
+                map.put("user", user);
+            }
+
         }
         return new Message(0, Constant.USER_LOGIN_RETURN, map);
     }
 
     // 注册
     @MessageType(Constant.USER_LOGUP)
-    public void logup(ResultMessage msg) {
-        String body = msg.getBody();
+    public void logup(Message msg) {
+        String body = (String) msg.getBody();
         String[] strings = body.split(",");
 
         String username = strings[0];
@@ -67,8 +74,8 @@ public class LoginController
 
     // 用户名是否存在
     @MessageType(262)
-    public void existUsername(ResultMessage msg) {
-        int id = userService.queryIdByUsername(msg.getBody());
+    public void existUsername(Message msg) {
+        int id = userService.queryIdByUsername((String) msg.getBody());
         System.out.println("结果：" + id);
     }
 

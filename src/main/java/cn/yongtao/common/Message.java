@@ -4,7 +4,16 @@ public class Message
 {
     private short length;
     private short type;
-    Object body;
+    private Object body;
+
+
+    public Message() {
+    }
+
+    public Message(int type, Object body) {
+        this.type = (short) type;
+        this.body = body;
+    }
 
     public Message(int length, int type, Object body) {
         this.length = (short) length;

@@ -21,6 +21,9 @@ public class Constant
 
     //    2.用户
     private static final int USER = 2 << 8;
+    // 获取好友列表
+    public static final int USER_FRIEND = USER + 1;
+    public static final int USER_FRIEND_RETURN = USER_FRIEND + 1;
 
 
     //    3.聊天

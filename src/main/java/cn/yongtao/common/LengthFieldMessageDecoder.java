@@ -42,6 +42,6 @@ public class LengthFieldMessageDecoder extends LengthFieldBasedFrameDecoder
         buf.readBytes(b);
 
         String msgBody = new String(b, StandardCharsets.UTF_8);
-        return new ResultMessage(length, type, msgBody);
+        return new Message(length, type, msgBody);
     }
 }

@@ -10,8 +10,8 @@
         where id = #{id}
     </select>
 
-    <select id="queryPassword" parameterType="string" resultType="string">
-        select password
+    <select id="queryPassword" parameterType="string" resultType="user">
+        select id, password
         from user
         where username = #{username}
     </select>
@@ -19,6 +19,13 @@
     <select id="queryIdByUsername" parameterType="string" resultType="int">
         select ifnull((select id from user where username = #{username} limit 1), 0)
     </select>
+
+    <select id="queryFriend" parameterType="int" resultType="user">
+        select friend_id as id, time as create_time
+        from friend
+        where id = #{id}
+    </select>
+
 
     <insert id="insertUser" parameterType="user">
         insert into user(username, password, status, create_time) value (#{username}, #{password}, 0, current_timestamp)

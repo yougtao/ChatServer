@@ -5,6 +5,8 @@ import cn.yongtao.mapper.UserMapper;
 import cn.yongtao.pojo.User;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService
 {
@@ -17,19 +19,19 @@ public class UserService
 
     public User loginUser(String username, String password) {
 
-        String passwordHash = userMapper.queryPassword(username);
+        User user = userMapper.queryPassword(username);
 
-        User user = null;
-        if (BCrypt.checkpw(password, passwordHash)) {
-            System.out.println("It matches");
+        if (user == null)
+            return null;
 
+        if (BCrypt.checkpw(password, user.getPassword())) {
             // 查询用户信息
-            int id = userMapper.queryIdByUsername(username);
-            user = userMapper.queryUser(id);
+            user = userMapper.queryUser(user.getId());
 
             // 修改登录时间
-            userMapper.updateLastTime(id);
+            userMapper.updateLastTime(user.getId());
         }
+        user.setPassword("");
         return user;
     }
 
@@ -46,6 +48,12 @@ public class UserService
     // 用户名是否重复
     public int queryIdByUsername(String username) {
         return userMapper.queryIdByUsername(username);
+    }
+
+
+    // 查询好友
+    public List<User> queryFriend(int id) {
+        return userMapper.queryFriend(id);
     }
 
 }// end

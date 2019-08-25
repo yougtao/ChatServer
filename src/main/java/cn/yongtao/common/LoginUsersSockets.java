@@ -30,4 +30,18 @@ public class LoginUsersSockets
         }
     }
 
+
+    // 发送消息
+    public static boolean sendTo(int id, int type, Object object) {
+        if (object == null)
+            return false;
+
+        Channel channel = map.get(id);
+        if (channel == null)
+            return false;
+
+        channel.writeAndFlush(new Message(type, object));
+        return true;
+    }
+
 }// end

@@ -6,6 +6,7 @@ import cn.yongtao.common.LoginUsersSockets;
 import cn.yongtao.common.Message;
 import cn.yongtao.common.ResultMessage;
 import cn.yongtao.controller.ChatController;
+import cn.yongtao.controller.FriendController;
 import cn.yongtao.controller.LoginController;
 import cn.yongtao.pojo.User;
 import io.netty.channel.ChannelHandler;
@@ -31,10 +32,12 @@ public class MainHandler extends SimpleChannelInboundHandler<Object>
 
     private final LoginController loginController;
     private final ChatController chatController;
+    private final FriendController friendController;
 
-    public MainHandler(LoginController loginController, ChatController chatController) {
+    public MainHandler(LoginController loginController, ChatController chatController, FriendController friendController) {
         this.loginController = loginController;
         this.chatController = chatController;
+        this.friendController = friendController;
     }
 
 
@@ -50,7 +53,7 @@ public class MainHandler extends SimpleChannelInboundHandler<Object>
 
         // 断开连接
         //loginController.close(ctx);
-        LoginUsersSockets.remove((SocketChannel) ctx.channel()); // 删除channel
+        LoginUsersSockets.remove(ctx.channel()); // 删除channel
         super.channelInactive(ctx);
     }
 
@@ -62,7 +65,7 @@ public class MainHandler extends SimpleChannelInboundHandler<Object>
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object o) {
-        ResultMessage msg = (ResultMessage) o;
+        Message msg = (Message) o;
         logger.info("收到消息 type=" + msg.getType() + " body=>" + msg.getBody());
 
         // 将处理分到不同的Controller上
@@ -76,23 +79,33 @@ public class MainHandler extends SimpleChannelInboundHandler<Object>
                     if (method != null)
                         result = (Message) method.invoke(loginController, msg);
 
-                    if (type == Constant.USER_LOGIN && result != null) {
+                    if (type == Constant.USER_LOGIN) {
                         @SuppressWarnings("unchecked")
                         Map<String, Object> map = (HashMap<String, Object>) result.getBody();
-                        User user = (User) map.get("user");
-                        LoginUsersSockets.add(user.getId(), ctx.channel());
-                    }
 
-                    if (result != null) {
+                        // 返回消息
                         ctx.writeAndFlush(result);
-                    }
 
+                        // 保存channel
+                        if (map.get("user") != null) {
+                            User user = (User) map.get("user");
+                            LoginUsersSockets.add(user.getId(), ctx.channel());
+                        }
+                    }
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     e.printStackTrace();
                     break;
                 }
-
-
+                break;
+            case 2:
+                try {
+                    Method method = friendController.methods.get(type);
+                    if (method != null)
+                        method.invoke(friendController,  msg);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                    break;
+                }
                 break;
             case 3:
                 try {
