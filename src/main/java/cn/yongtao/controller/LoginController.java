@@ -1,8 +1,10 @@
 package cn.yongtao.controller;
 
 import cn.yongtao.common.Constant;
+import cn.yongtao.common.Message;
 import cn.yongtao.common.MessageType;
 import cn.yongtao.common.ResultMessage;
+import cn.yongtao.pojo.User;
 import cn.yongtao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,11 +34,21 @@ public class LoginController
 
     // 登录
     @MessageType(Constant.USER_LOGIN)
-    public void login(ResultMessage msg) {
+    public Message login(ResultMessage msg) {
         String body = msg.getBody();
         String[] strings = body.split(",");
 
-        userService.loginUser(strings[0], strings[1]);
+        User user = userService.loginUser(strings[0], strings[1]);
+        Map<String, Object> map = new HashMap<>();
+        if (user != null) {
+            map.put("code", 200);
+            map.put("msg","success");
+            map.put("user", user);
+        } else {
+            map.put("code", 401);
+            map.put("msg", "password");
+        }
+        return new Message(0, Constant.USER_LOGIN_RETURN, map);
     }
 
     // 注册

@@ -1,10 +1,14 @@
 package cn.yongtao.handler;
 
 import cn.yongtao.ChatServer;
+import cn.yongtao.common.Constant;
 import cn.yongtao.common.LoginUsersSockets;
+import cn.yongtao.common.Message;
 import cn.yongtao.common.ResultMessage;
 import cn.yongtao.controller.ChatController;
 import cn.yongtao.controller.LoginController;
+import cn.yongtao.pojo.User;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
@@ -13,9 +17,12 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Component
+@ChannelHandler.Sharable
 public class MainHandler extends SimpleChannelInboundHandler<Object>
 {
 
@@ -60,18 +67,32 @@ public class MainHandler extends SimpleChannelInboundHandler<Object>
 
         // 将处理分到不同的Controller上
         int type = msg.getType();
-        ResultMessage result;
+        Message result = null;
 
         switch (type >> 8) {
             case 1:
                 try {
                     Method method = loginController.methods.get(type);
                     if (method != null)
-                        method.invoke(loginController, msg);
+                        result = (Message) method.invoke(loginController, msg);
+
+                    if (type == Constant.USER_LOGIN && result != null) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> map = (HashMap<String, Object>) result.getBody();
+                        User user = (User) map.get("user");
+                        LoginUsersSockets.add(user.getId(), ctx.channel());
+                    }
+
+                    if (result != null) {
+                        ctx.writeAndFlush(result);
+                    }
+
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     e.printStackTrace();
                     break;
                 }
+
+
                 break;
             case 3:
                 try {

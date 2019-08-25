@@ -3,7 +3,6 @@ package cn.yongtao.service;
 import cn.yongtao.common.BCrypt;
 import cn.yongtao.mapper.UserMapper;
 import cn.yongtao.pojo.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,21 +15,22 @@ public class UserService
     }
 
 
-    public void loginUser(String username, String password) {
+    public User loginUser(String username, String password) {
 
         String passwordHash = userMapper.queryPassword(username);
 
+        User user = null;
         if (BCrypt.checkpw(password, passwordHash)) {
             System.out.println("It matches");
 
             // 查询用户信息
             int id = userMapper.queryIdByUsername(username);
-            User user = userMapper.queryUser(id);
+            user = userMapper.queryUser(id);
 
             // 修改登录时间
             userMapper.updateLastTime(id);
-        } else
-            System.out.println("It does not match");
+        }
+        return user;
     }
 
 
